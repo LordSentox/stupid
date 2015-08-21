@@ -7,7 +7,7 @@ extern crate sdl2;
 use self::sdl2::render::{Texture, Renderer};
 use self::sdl2::rect::Rect;
 
-use texture_manager::TextureManager;
+use graphics::TextureManager;
 
 pub struct StaticObject<'a> {
 	texture: &'a Texture,

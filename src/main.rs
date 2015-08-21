@@ -8,7 +8,7 @@
 extern crate sdl2;
 
 mod static_object;
-mod texture_manager;
+mod graphics;
 
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
@@ -19,10 +19,10 @@ fn draw_grid(buffer: &mut [u8], pitch: usize, width: u32, height: u32) {
         for x in (0..width as usize) {
             let offset = y*pitch + x*3;
 
-            if (y % 64 == 0) | (x % 64 == 0) {
-                buffer[offset + 0] = 0;
-                buffer[offset + 1] = 0;
-                buffer[offset + 2] = 0;
+            if (y % 32 == 0) | (x % 32 == 0) {
+                buffer[offset + 0] = 20;
+                buffer[offset + 1] = 20;
+                buffer[offset + 2] = 20;
             }
             else {
                 buffer[offset + 0] = 240;
