@@ -10,12 +10,12 @@ use sdl2::render::Renderer;
 use super::texture_manager::TextureManager;
 use super::sprite::Sprite;
 use super::drawable::Drawable;
-use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 pub struct RenderWindow<'a> {
 	context: &'a Sdl,
 
-	renderer: Rc<Renderer<'static>>,
+	renderer: Arc<Mutex<Renderer<'static>>>,
 	textures: TextureManager
 }
 
@@ -29,7 +29,7 @@ impl<'a> RenderWindow<'a> {
 
 		// Build the renderer that is used to draw anything to the window. Currently it is always
 		// hardware accelerated.
-		let renderer = Rc::new(window.renderer().accelerated().build().unwrap());
+		let renderer = Arc::new(Mutex::new(window.renderer().accelerated().build().unwrap()));
 
 		// The texture manager, dependent on the renderer, since all textures are bound to the
 		// graphics card on which the renderer is running.
@@ -66,20 +66,23 @@ impl<'a> RenderWindow<'a> {
 	///
 	/// Draw the provided object to this window.
 	pub fn draw<T: Drawable>(&mut self, obj: &T) {
-		obj.draw(Rc::get_mut(&mut self.renderer).unwrap());
+		let mut renderer = self.renderer.lock().unwrap();
+		obj.draw(&mut renderer);
 	}
 
 	/// # Clear the screen
 	///
 	/// Clear the screen in all black colour to avoid artifacts that otherwise may occur.
 	pub fn clear(&mut self) {
-		Rc::get_mut(&mut self.renderer).unwrap().clear();
+		let mut renderer = self.renderer.lock().unwrap();
+		renderer.clear();
 	}
 
 	/// # Present the screen
 	///
 	/// Flips the current drawing buffer to present the newly created frame.
 	pub fn present(&mut self) {
-		Rc::get_mut(&mut self.renderer).unwrap().present();
+		let mut renderer = self.renderer.lock().unwrap();
+		renderer.present();
 	}
 }

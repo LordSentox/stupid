@@ -4,14 +4,14 @@
  */
 
 extern crate sdl2;
+extern crate sdl2_image;
 use sdl2::render::{Texture, Renderer};
 use sdl2::surface::Surface;
 use sdl2::{SdlResult};
 
-use sdl2_image::{self, LoadSurface};
-
 use std::collections::HashMap;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
 use std::rc::Rc;
 
 /// Internal structure, used to save the Texture itself, and some other data that may be important,
@@ -23,7 +23,7 @@ pub struct TextureEntry {
 }
 
 pub struct TextureManager {
-    renderer: Rc<Renderer<'static>>,
+    renderer: Arc<Mutex<Renderer<'static>>>,
     textures: HashMap<String, TextureEntry>
 }
 
@@ -61,7 +61,7 @@ impl TextureEntry {
 }
 
 impl TextureManager {
-    pub fn new(renderer: Rc<Renderer<'static>>) -> TextureManager {
+    pub fn new(renderer: Arc<Mutex<Renderer<'static>>>) -> TextureManager {
         TextureManager {
             renderer: renderer,
             textures: HashMap::new()
@@ -85,7 +85,7 @@ impl TextureManager {
         }
         else {
             // The texture had not yet been loaded.
-            let surface = match Surface::from_file(&Path::new(name)) {
+            let surface = match Surface::load_bmp(&Path::new(name)) {
                 Ok(surface) => surface,
                 Err(err) => {
                     println!("Error occured loading {}. {}", name, err);
@@ -93,7 +93,8 @@ impl TextureManager {
                 }
             };
 
-            let texture_entry = match TextureEntry::from_surface(&*self.renderer, surface) {
+            let renderer = self.renderer.lock().unwrap();
+            let texture_entry = match TextureEntry::from_surface(&renderer, surface) {
                 Ok(texture_entry) => texture_entry,
                 Err(err) => {
                     println!("Error occured creating texture for {}. {}", name, err);
@@ -104,7 +105,7 @@ impl TextureManager {
             // After this it is certain, that the texture entry has been loaded correctly, now it has
             // to be saved in the map to avoid duplication.
             self.textures.insert(String::from(name), texture_entry);
-            self.textures.get(&String::from(name))
+            self.textures.get(name)
         }
     }
 
