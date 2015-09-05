@@ -8,26 +8,29 @@ use sdl2::render::{Texture, Renderer};
 use sdl2::surface::Surface;
 use sdl2::{SdlResult};
 
+use sdl2_image::{self, LoadSurface};
+
 use std::collections::HashMap;
 use std::path::Path;
+use std::rc::Rc;
 
 /// Internal structure, used to save the Texture itself, and some other data that may be important,
 /// like the original size of the Surface, which could otherwise not be accessed any longer.
 pub struct TextureEntry {
-    texture: Texture,
+    texture: Rc<Texture>,
     width: u32,
     height: u32
 }
 
-pub struct TextureManager<'a> {
-    renderer: &'a Renderer<'a>,
+pub struct TextureManager {
+    renderer: Rc<Renderer<'static>>,
     textures: HashMap<String, TextureEntry>
 }
 
 impl TextureEntry {
     pub fn new(texture: Texture, width: u32, height: u32) -> TextureEntry {
         TextureEntry {
-            texture: texture,
+            texture: Rc::new(texture),
             width: width,
             height: height
         }
@@ -38,14 +41,14 @@ impl TextureEntry {
             width: surface.width(),
             height: surface.height(),
             texture: match renderer.create_texture_from_surface(surface) {
-                Ok(surface) => surface,
+                Ok(texture) => Rc::new(texture),
                 Err(err) => return Err(err)
             }
         })
     }
 
-    pub fn texture(&self) -> &Texture {
-        &self.texture
+    pub fn texture(&self) -> Rc<Texture> {
+        self.texture.clone()
     }
 
     pub fn width(&self) -> u32 {
@@ -57,8 +60,8 @@ impl TextureEntry {
     }
 }
 
-impl<'a> TextureManager<'a> {
-    pub fn new(renderer: &'a Renderer) -> TextureManager<'a> {
+impl TextureManager {
+    pub fn new(renderer: Rc<Renderer<'static>>) -> TextureManager {
         TextureManager {
             renderer: renderer,
             textures: HashMap::new()
@@ -82,7 +85,7 @@ impl<'a> TextureManager<'a> {
         }
         else {
             // The texture had not yet been loaded.
-            let surface = match Surface::load_bmp(Path::new(name)) {
+            let surface = match Surface::from_file(&Path::new(name)) {
                 Ok(surface) => surface,
                 Err(err) => {
                     println!("Error occured loading {}. {}", name, err);
@@ -90,7 +93,7 @@ impl<'a> TextureManager<'a> {
                 }
             };
 
-            let texture_entry = match TextureEntry::from_surface(self.renderer, surface) {
+            let texture_entry = match TextureEntry::from_surface(&*self.renderer, surface) {
                 Ok(texture_entry) => texture_entry,
                 Err(err) => {
                     println!("Error occured creating texture for {}. {}", name, err);
