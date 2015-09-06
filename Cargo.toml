@@ -6,3 +6,4 @@ authors = ["Arne Dussin <arne.dussin@live.de>"]
 [dependencies]
 sdl2 = "*"
 sdl2_image = "*"
+time = "*"

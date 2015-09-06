@@ -5,6 +5,7 @@
 
 extern crate sdl2;
 extern crate sdl2_image;
+use sdl2::pixels::Color;
 use sdl2::render::{Texture, Renderer};
 use sdl2::surface::Surface;
 use sdl2::{SdlResult};
@@ -85,13 +86,18 @@ impl TextureManager {
         }
         else {
             // The texture had not yet been loaded.
-            let surface = match Surface::load_bmp(&Path::new(name)) {
+            let mut surface = match Surface::load_bmp(&Path::new(name)) {
                 Ok(surface) => surface,
                 Err(err) => {
                     println!("Error occured loading {}. {}", name, err);
                     return None;
                 }
             };
+
+            // Set the colour key for this texture.
+            // TODO: In case this turns into a library, there must be an option to change the
+            // colour of the colour key.
+            surface.set_color_key(true, Color::RGB(255, 255, 0)).unwrap();
 
             let renderer = self.renderer.lock().unwrap();
             let texture_entry = match TextureEntry::from_surface(&renderer, surface) {
