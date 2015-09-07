@@ -6,7 +6,6 @@
 #![feature(convert)]
 
 extern crate sdl2;
-extern crate sdl2_image;
 extern crate time;
 
 mod character;
@@ -21,7 +20,6 @@ use sdl2::event::Event;
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();
-    sdl2_image::init(sdl2_image::INIT_PNG);
     let mut window = graphics::RenderWindow::new(&sdl_context, "Stupid is awesome", 800, 600);
 
     let mut running = true;
@@ -44,6 +42,4 @@ fn main() {
         window.draw(player.character());
         window.present();
     }
-
-    sdl2_image::quit();
 }

@@ -4,7 +4,6 @@
  */
 
 extern crate sdl2;
-extern crate sdl2_image;
 use sdl2::pixels::Color;
 use sdl2::render::{Texture, Renderer};
 use sdl2::surface::Surface;
