@@ -5,23 +5,31 @@
 // TODO: Would it make a notable difference to do all the rendering in a different thread? All
 // drawables would have to be shareable.
 
-use sdl2::Sdl;
+use sdl2::{EventPump, Sdl};
 use sdl2::render::Renderer;
+pub use sdl2::event::EventPollIterator;
+
 use super::texture_manager::TextureManager;
 use super::sprite::Sprite;
 use super::drawable::Drawable;
 use std::sync::{Arc, Mutex};
+use time::{self, Timespec};
 
 pub struct RenderWindow<'a> {
 	context: &'a Sdl,
+	event_pump: EventPump,
 
 	renderer: Arc<Mutex<Renderer<'static>>>,
-	textures: TextureManager
+	textures: TextureManager,
+
+	last_time: Timespec,
+	frame_dur: f32
 }
 
 impl<'a> RenderWindow<'a> {
 	pub fn new(context: &'a Sdl, title: &str, width: u32, height: u32) -> RenderWindow<'a> {
 		let video_subsystem = context.video().unwrap();
+		let event_pump = context.event_pump().unwrap();
 
 		// Using some very common settings here. Sadly, Fullscreen in Linux is broken, but to be
 		// honest, I always thought it should be handled by the window manager anyhow.
@@ -38,8 +46,12 @@ impl<'a> RenderWindow<'a> {
 		// At this point everything is initialised.
 		RenderWindow {
 			context: context,
+			event_pump: event_pump,
 			renderer: renderer,
-			textures: textures
+			textures: textures,
+
+			last_time: time::get_time(),
+			frame_dur: 0.1
 		}
 	}
 
@@ -82,7 +94,36 @@ impl<'a> RenderWindow<'a> {
 	///
 	/// Flips the current drawing buffer to present the newly created frame.
 	pub fn present(&mut self) {
+		// Measure the framerate
+		let cur_time = time::get_time();
+		let frame_dur = cur_time - self.last_time;
+		self.last_time = cur_time;
+
+		// convert the exact duration to the approximate f32 value.
+		self.frame_dur = frame_dur.num_microseconds().unwrap() as f32 / 1000000.0;
+
 		let mut renderer = self.renderer.lock().unwrap();
 		renderer.present();
+	}
+
+	/// The framerate
+	///
+	/// Returns the current framerate of the window in frames/sec.
+	pub fn fps(&self) -> u16 {
+		(1.0 / self.frame_dur) as u16
+	}
+
+	/// # The frame duration
+	///
+	/// Returns the duration of the last measured frame in seconds.
+	pub fn frame_duration(&self) -> f32 {
+		self.frame_dur
+	}
+
+	/// # Get the event iterator
+	///
+	/// Polls all the events that have not been processed before from the event pump.
+	pub fn poll_events(&mut self) -> EventPollIterator {
+		self.event_pump.poll_iter()
 	}
 }

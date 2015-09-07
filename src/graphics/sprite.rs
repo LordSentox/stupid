@@ -4,6 +4,7 @@ use sdl2::rect::Rect;
 use graphics::{Drawable};
 use graphics::texture_manager::TextureEntry;
 use std::rc::Rc;
+use movable::Movable;
 
 pub struct Sprite {
 	texture: Rc<Texture>,
@@ -44,39 +45,6 @@ impl Sprite {
 				}
 			}
 		}
-	}
-
-	/// # Move the sprite
-	///
-	/// Move the sprite by the provided vector. While it can only be rendered by whole pixels, it
-	/// can virtually be moved seamlessly.
-	pub fn translate(&mut self, x: f32, y: f32) {
-		// May I just say, that having move as a keyword really sucks at this moment?
-		self.x += x;
-		self.y += y;
-	}
-
-	/// Get the x position.
-	pub fn x(&self) -> f32 {
-		self.x
-	}
-
-	/// Get the y position.
-	pub fn y(&self) -> f32 {
-		self.y
-	}
-
-	/// Get the position vector (x, y).
-	pub fn pos(&self) -> (f32, f32) {
-		(self.x, self.y)
-	}
-
-	/// # Set the position
-	///
-	/// Set the position of the sprite by providing a completely new position vector (x, y).
-	pub fn set_pos(&mut self, pos: (f32, f32)) {
-		self.x = pos.0;
-		self.y = pos.1;
 	}
 
 	/// # Resize the sprite
@@ -122,6 +90,35 @@ impl Sprite {
 	/// This returns the current rotation of the sprite in degrees.
 	pub fn rotation(&self) -> f64 {
 		self.angle
+	}
+}
+
+impl Movable for Sprite {
+	/// # Move the sprite
+	///
+	/// Move the sprite by the provided vector. While it can only be rendered by whole pixels, it
+	/// can virtually be moved seamlessly.
+	fn translate(&mut self, x: f32, y: f32) {
+		// May I just say, that having move as a keyword really sucks at this moment?
+		self.x += x;
+		self.y += y;
+	}
+
+	fn set_pos(&mut self, pos: (f32, f32)) {
+		self.x = pos.0;
+		self.y = pos.1;
+	}
+
+	fn x(&self) -> f32 {
+		self.x
+	}
+
+	fn y(&self) -> f32 {
+		self.y
+	}
+
+	fn pos(&self) -> (f32, f32) {
+		(self.x, self.y)
 	}
 }
 

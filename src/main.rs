@@ -7,9 +7,15 @@
 
 extern crate sdl2;
 extern crate sdl2_image;
+extern crate time;
 
-mod static_object;
+mod character;
+mod entity;
 mod graphics;
+mod movable;
+mod player;
+use player::Player;
+mod static_object;
 
 use sdl2::event::Event;
 
@@ -18,21 +24,24 @@ fn main() {
     sdl2_image::init(sdl2_image::INIT_PNG);
     let mut window = graphics::RenderWindow::new(&sdl_context, "Stupid is awesome", 800, 600);
 
-    let test_sprite = window.create_sprite("test_sprite.bmp", (0.0, 0.0), None).unwrap();
-
     let mut running = true;
-    let mut event_pump = sdl_context.event_pump().unwrap();
+
+    let mut player = Player::new(&mut window);
 
     while running {
-        for event in event_pump.poll_iter() {
+        for event in window.poll_events() {
+            player.process_event(&event);
+
             match event {
                 Event::Quit {..} => running = false,
                 _ => {}
             }
         }
 
+        player.update(&window);
+
         window.clear();
-        window.draw(&test_sprite);
+        window.draw(player.character());
         window.present();
     }
 
