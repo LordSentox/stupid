@@ -11,7 +11,7 @@ pub trait Entity {
 
 	/// # The maximum health
 	///
-	/// The entities maximum health should be defined by this. Since the actual implementation may
+	/// The entity's maximum health should be defined by this. Since the actual implementation may
 	/// vary between entities, this is not a static function.
 	fn max_health(&self) -> u16;
 
@@ -25,7 +25,7 @@ pub trait Entity {
 	/// # Heal this entity
 	///
 	/// This function calculates the actual healing this entity gets from the raw healing provided.
-	/// It then returns the actual healing that was done. In case the healing topped off the the
+	/// It then returns the actual healing that was done. In case the healing topped off the
 	/// health, this function should return the theoretical amount, not the actual amount.
 	fn heal<T: Entity>(&mut self, raw_healing: u16, source: &T) -> u16;
 }

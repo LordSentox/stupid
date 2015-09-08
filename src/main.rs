@@ -15,6 +15,7 @@ mod movable;
 mod player;
 use player::Player;
 mod static_object;
+mod sys;
 
 use sdl2::event::Event;
 
