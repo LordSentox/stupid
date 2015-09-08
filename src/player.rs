@@ -8,7 +8,7 @@ use sdl2::keyboard::Keycode;
 use sdl2::event::Event;
 use character::Character;
 use std::fmt::{Display, Error, Formatter};
-use movable::Movable;
+use sys::{Movable, Vector};
 
 pub struct Player {
 	character: Character,
@@ -52,32 +52,30 @@ impl Player {
 	}
 
 	pub fn update(&mut self, game_window: &RenderWindow) {
-		let mut mov_vec: (f32, f32) = (0.0, 0.0);
+		let mut mov_vec: Vector<f32> = Vector::new(0.0, 0.0);
 
 		if self.left_pressed {
-			mov_vec.0 = -1.0;
+			mov_vec.x = -1.0;
 		}
 		else if self.right_pressed {
-			mov_vec.0 = 1.0;
+			mov_vec.x = 1.0;
 		}
 
 		if self.up_pressed {
-			mov_vec.1 = -1.0;
+			mov_vec.y = -1.0;
 		}
 		else if self.down_pressed {
-			mov_vec.1 = 1.0;
+			mov_vec.y = 1.0;
 		}
 
 		// Normalize the vector, so that the speed is the same in every direction.
-		// TODO: A vector class could do much good, especially later on!
-		if mov_vec != (0.0, 0.0) {
-			let length = (mov_vec.0.powi(2) + mov_vec.1.powi(2)).sqrt();
+		if mov_vec != Vector::new(0.0, 0.0) {
+			let normalised = mov_vec.normalise();
 
-			mov_vec.0 = (mov_vec.0 / length) * 400.0 * game_window.frame_duration();
-			mov_vec.1 = (mov_vec.1 / length) * 400.0 * game_window.frame_duration();
+			mov_vec = normalised * 400.0 * game_window.frame_duration();
 		}
 
-		self.character.translate(mov_vec.0, mov_vec.1);
+		self.character.translate(mov_vec.x, mov_vec.y);
 	}
 
 	pub fn character(&self) -> &Character {

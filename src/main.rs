@@ -11,7 +11,6 @@ extern crate time;
 mod character;
 mod entity;
 mod graphics;
-mod movable;
 mod player;
 use player::Player;
 mod static_object;

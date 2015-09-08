@@ -4,7 +4,7 @@ use sdl2::rect::Rect;
 use graphics::{Drawable};
 use graphics::texture_manager::TextureEntry;
 use std::rc::Rc;
-use movable::Movable;
+use sys::{Movable, Vector};
 
 pub struct Sprite {
 	texture: Rc<Texture>,
@@ -104,9 +104,9 @@ impl Movable for Sprite {
 		self.y += y;
 	}
 
-	fn set_pos(&mut self, pos: (f32, f32)) {
-		self.x = pos.0;
-		self.y = pos.1;
+	fn set_pos(&mut self, pos: Vector<f32>) {
+		self.x = pos.x;
+		self.y = pos.y;
 	}
 
 	fn x(&self) -> f32 {
@@ -117,8 +117,8 @@ impl Movable for Sprite {
 		self.y
 	}
 
-	fn pos(&self) -> (f32, f32) {
-		(self.x, self.y)
+	fn pos(&self) -> Vector<f32> {
+		Vector::new(self.x, self.y)
 	}
 }
 

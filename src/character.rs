@@ -6,7 +6,7 @@
 
 use entity::Entity;
 use sdl2::render::Renderer;
-use movable::Movable;
+use sys::{Movable, Vector};
 use graphics::{Sprite, Drawable, RenderWindow};
 
 const MAX_HEALTH: u16 = 10;
@@ -68,7 +68,7 @@ impl Movable for Character {
 		self.sprite.translate(x, y);
 	}
 
-	fn set_pos(&mut self, pos: (f32, f32)) {
+	fn set_pos(&mut self, pos: Vector<f32>) {
 		self.sprite.set_pos(pos);
 	}
 
@@ -80,7 +80,7 @@ impl Movable for Character {
 		self.sprite.y()
 	}
 
-	fn pos(&self) -> (f32, f32) {
+	fn pos(&self) -> Vector<f32> {
 		self.sprite.pos()
 	}
 }
