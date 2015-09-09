@@ -22,13 +22,6 @@ impl Packet {
 	}
 }
 
-	pub fn from_id(id: u8, data: &[u8]) -> Box<Packet> {
-		match id {
-			0 => Box::new(SpawnEntity::from_bytes(data) as Packet),
-			_ => panic!("Incorrect packet id.")
-		}
-	}
-
 pub trait Packet {
 	/// # The packets id
 	///

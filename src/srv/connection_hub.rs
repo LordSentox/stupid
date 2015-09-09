@@ -10,7 +10,7 @@ use std::thread;
 
 use std::collections::HashMap;
 use srv::User;
-use packets::Packet;
+use packets::{Packet, SpawnEntity};
 
 type SafeUserMap = Arc<Mutex<HashMap<SocketAddr, User>>>;
 
@@ -66,6 +66,43 @@ impl ConnectionHub {
 	}
 
 	fn receive_udp(udp_socket: UdpSocket, users: SafeUserMap) {
+		let mut id: [u8; 1] = [0];
+
+		loop {
+			let sender = match udp_socket.recv_from(&mut id) {
+				Ok((size, sender)) => {
+					// When the socket is closed, the last received size should be 0.
+					if size == 0 {
+						break;
+					}
+
+					sender
+				},
+				Err(err) => {
+					println!("Error reading from UDP socket. {}", err);
+					break;
+				}
+			};
+
+			// Check if there is a connection corresponding to the sender. If not, the packet is
+			// ignored.
+			let users_map = users.lock().unwrap();
+			if !users_map.contains_key(&sender) {
+				continue;
+			}
+
+			// Let go of the lock.
+			drop(users_map);
+
+			match id[0] {
+				0 => {
+					let data = vec![0; SpawnEntity::SIZE as usize];
+					let
+
+				},
+				undefined => panic!("Invalid packet received. Id {} not registered.", undefined)
+			}
+		}
 	}
 
 	/// # Send a packet using TCP
