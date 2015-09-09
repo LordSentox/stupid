@@ -5,9 +5,10 @@
 
 use std::io::prelude::*;
 use std::net::{TcpStream, SocketAddr, Shutdown};
-use std::thread::{self, JoinHandle};
+use std::thread;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use packets::Packet;
 
 pub struct User {
 	stream: TcpStream,
@@ -24,7 +25,7 @@ impl User {
 		let open = Arc::new(AtomicBool::new(true));
 		let open_clone = open.clone();
 		thread::spawn(move || {
-			User::receive_messages(receive_stream, open_clone);
+			User::receive_tcp(receive_stream, open_clone);
 		});
 
 		println!("Connected to {}", stream.peer_addr().unwrap());
@@ -35,10 +36,11 @@ impl User {
 		}
 	}
 
-	/// # Receive Messages
+	/// # Receive from TCP
 	///
-	/// Private function used to
-	fn receive_messages(mut stream: TcpStream, open: Arc<AtomicBool>) {
+	/// While packets sent via UDP are received by the connection hub, the user handles all of the
+	/// packets sent using TCP themselves, since the stream is owned.
+	fn receive_tcp(mut stream: TcpStream, open: Arc<AtomicBool>) {
 		while open.load(Ordering::Relaxed) {
 			let mut data = vec![0; 10];
 
@@ -67,11 +69,12 @@ impl User {
 		drop(stream);
 	}
 
-	pub fn send_message(&mut self, msg: &str) -> Result<usize, String> {
-		let data = msg.as_bytes();
+	pub fn send_tcp<P: Packet>(&mut self, data: &P) -> Result<usize, String> {
+		let mut vec = vec![P::id()];
+		vec.append(&mut data.to_bytes());
 
 		// TODO: This is a stupid workaround, because the io::error::Error type is private.
-		match self.stream.write(&data) {
+		match self.stream.write(&vec) {
 			Ok(size) => Ok(size),
 			Err(err) => Err(format!("{}", err))
 		}

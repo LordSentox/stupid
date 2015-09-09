@@ -26,8 +26,11 @@ pub struct SpawnEntity {
 }
 
 impl Packet for SpawnEntity {
-	const ID: u8 = 0;
 	const SIZE: u32 = 13;
+
+	fn id() -> u8 {
+		0
+	}
 
 	fn from_bytes(data: &[u8]) -> SpawnEntity {
 		let mut data = Cursor::new(data);

@@ -9,11 +9,31 @@ extern crate byteorder;
 pub mod spawn_entity;
 pub use self::spawn_entity::SpawnEntity;
 
+impl Packet {
+	/// # Get a packet's size
+	///
+	/// This function will check which packet the given id refers to and provide its size, so that
+	/// it can be read from the stream and then constructed.
+	pub fn get_matching_size(id: u8) -> u32 {
+		match id {
+			0 => SpawnEntity::SIZE,
+			_ => panic!("Incorrect packet id.")
+		}
+	}
+}
+
+	pub fn from_id(id: u8, data: &[u8]) -> Box<Packet> {
+		match id {
+			0 => Box::new(SpawnEntity::from_bytes(data) as Packet),
+			_ => panic!("Incorrect packet id.")
+		}
+	}
+
 pub trait Packet {
 	/// # The packets id
 	///
 	/// Every packet has a unique number, through which it can be identified.
-	const ID: u8;
+	fn id() -> u8;
 
 	/// # The data size
 	///

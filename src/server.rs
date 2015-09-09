@@ -5,13 +5,12 @@
 
 #![allow(dead_code)]
 
+#![feature(append)]
 #![feature(associated_consts)]
 
 mod packets;
 mod srv;
 mod sys;
-
-use srv::ConnectionHub;
 
 pub fn main() {
 	println!("This is awesome main function.");
