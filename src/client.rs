@@ -5,6 +5,8 @@
 // This is necessary for handy String-conversions, which are currently awaiting RFC revision.
 #![feature(convert)]
 
+#![feature(associated_consts)]
+
 extern crate sdl2;
 extern crate time;
 
